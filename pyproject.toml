@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "looker-gen"
+version = "0.1.0"
+description = ""
+license = "BSD-4-Clause"
+authors = ["Aaron Bannin <aaronbannin@hotmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+lkml = "^1.2.0"
+click = "^8.1.2"
+PyYAML = "^6.0"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+looker-gen = 'looker_gen.cli:main'
