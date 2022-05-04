@@ -1,11 +1,12 @@
 import os
-from typing import List, Optional, Set
+from typing import Optional, Set
 
 import click
 import lkml
 
 from looker_gen.files import FileManager
 from looker_gen.generator import LookMLGenerator, _get_model_name
+from looker_gen.looker import linter
 
 
 def get_schema_targets(schemas: str) -> Optional[Set[str]]:
@@ -65,6 +66,19 @@ def main(connection_name: str, dbt_dir: str, models: str, output_dir: str, schem
         models_path = os.path.join(files.models_dir, models_name)
         with open(models_path, 'w') as modelfile:
             lkml.dump(models, modelfile)
+
+@click.command()
+@click.option('-l', '--looker-dir', 'looker_dir', default='./', help='Location of directory LookML repo. Default is "./"', type=click.STRING)
+@click.option('-p', '--project-name', 'project_name', help='Name of project in Looker', type=click.STRING)
+def validate(looker_dir: str, project_name: str) -> None:
+    validation = linter(looker_dir, project_name)
+    if len(validation.errors) == 0:
+        print('No errors!')
+        return
+
+    print('Formatting errors found')
+    for error in validation.errors:
+        print(error)
 
 
 if __name__ == '__main__':

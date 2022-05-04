@@ -10,6 +10,8 @@ python = "^3.8"
 lkml = "^1.2.0"
 click = "^8.1.2"
 PyYAML = "^6.0"
+looker-sdk = "^22.4.0"
+GitPython = "^3.1.27"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
@@ -20,3 +22,4 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 looker-gen = 'looker_gen.cli:main'
+validate = 'looker_gen.cli:validate'
