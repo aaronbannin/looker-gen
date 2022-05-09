@@ -4,6 +4,9 @@ lookml/
 # Looker config
 looker.ini
 
+# Logging config
+logging.ini
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
