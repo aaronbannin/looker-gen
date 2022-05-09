@@ -77,11 +77,11 @@ class LookMLGenerator:
         
         # make column names lower case for lookups; we are not case sensitive
         for node_name in self.catalog['nodes'].keys():
-            formatted = {k.lower(): v for k, v in self.catalog['nodes'][node_name]['columns'].items()}
+            formatted = {k.lower(): v for k, v in self.get_catalog_for_node(node_name).items()}
             self.catalog['nodes'][node_name]['columns'] = formatted
 
         for node_name in self.manifest['nodes'].keys():
-            formatted = {k.lower(): v for k, v in self.manifest['nodes'][node_name]['columns'].items()}
+            formatted = {k.lower(): v for k, v in self.get_manifest_for_node(node_name).items()}
             self.manifest['nodes'][node_name]['columns'] = formatted
 
         # build explores
@@ -147,7 +147,7 @@ class LookMLGenerator:
     def build_dimension(self, node_name: str, column_name: str) -> Dimension:
         args = {}
 
-        catalog = self.catalog['nodes'][node_name]['columns']
+        catalog = self.get_catalog_for_node(node_name)
         manifest = self.get_manifest_for_node(node_name)
 
         # should dim groups have type and datatype?
@@ -204,11 +204,12 @@ class LookMLGenerator:
         return dim_groups
         
     def build_measures(self, node_name: str, column_name: str) -> List[Measure]:
-        config = self.get_column_config(node_name=node_name, column_name=column_name)
+        config = self.get_column_config(node_name, column_name)
         manifest = self.get_manifest_for_node(node_name)
+        catalog = self.get_catalog_for_node(node_name)
 
         def parse_measure_args(measure: Dict[str, Any], column_name: str) -> Dict[str, Any]:
-            name_in_db = self.catalog['nodes'][node_name]['columns'][column_name]['name']
+            name_in_db = catalog[column_name]['name']
             looker_args = {k: v for k, v in measure.items() if k != 'name'}
             looker_args['sql'] = f'${{TABLE}}."{name_in_db}"'
             

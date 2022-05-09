@@ -29,12 +29,10 @@ def linter(looker_dir: str, project: str, test_content: bool) -> None:
 
     if len(validation.errors) == 0:
         log.info('No linting errors!')
-        return
-
-    print('Formatting errors found')
-    for error in validation.errors:
-        log.error(f'{error.severity} {error.file_path} {error.message}')
-
+    else:
+        log.error('Formatting errors found')
+        for error in validation.errors:
+            log.error(f'{error.severity} {error.file_path} {error.message}')
 
     if test_content:
         content = sdk.content_validation()

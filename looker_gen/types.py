@@ -36,7 +36,7 @@ class ExploreConfig:
         joins = [j.as_dict() for j in self.joins]
         
         return {
-            'includes': [parent_import, *join_imports],
+            'includes': [parent_import, *sorted(join_imports)],
             'explore': {**args, 'joins': joins}
         }
 
@@ -45,16 +45,11 @@ class Dimension(LookerType):
     pass
 
 @dataclass
-class DimensionGroup:
+class DimensionGroup(LookerType):
     name: str
     # TODO: make init only?
     timeframes: List[str]
     looker_args: Dict[str, Any]
-    
-    # TODO: Use super
-    def as_dict(self) -> Dict:
-        return {**self.looker_args, 'name': self.name, 'timeframes': self.timeframes}
-
 
 @dataclass
 class Measure(LookerType):
