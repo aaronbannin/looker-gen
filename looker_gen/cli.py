@@ -17,12 +17,18 @@ def get_schema_targets(schemas: str) -> Optional[Set[str]]:
     return {s.lower().strip() for s in schemas.split(',')}
 
 @click.command()
-@click.option('-c', '--connection-name', 'connection_name', help='Name of DB connection in Looker', type=click.STRING)
-@click.option('-d', '--dbt-dir', 'dbt_dir', default='./', help='Location of directory DBT project. Default is "./"', type=click.STRING)
+@click.option('-c', '--connection-name', 'connection_name', help='Name of DB connection in Looker', required=True, type=click.STRING)
+@click.option('-d', '--dbt-dir', 'dbt_dir', default='./', help='Location of directory DBT project. Does not resolve "~/". Default is "./"', type=click.Path(exists=True, file_okay=False))
 @click.option('-m', '--models', help='Build views and associated explores for the provided tables, comma seperated list', type=click.STRING)
-@click.option('-o', '--output-dir', 'output_dir', default='./lookml', help='Destination for generated LookML files; using your current LookML repo is encouraged. Default is "./lookml"', type=click.STRING)
+@click.option('-o', '--output-dir', 'output_dir', default='./lookml', help='Destination for generated LookML files; using your current LookML repo is encouraged. Does not resolve "~/". Default is "./lookml"', type=click.Path(exists=True, file_okay=False))
 @click.option('-s', '--schemas', help='Build lookml only for the provided schemas, comma seperated list', type=click.STRING)
-def main(connection_name: str, dbt_dir: str, models: str, output_dir: str, schemas: str) -> None:
+def gen(connection_name: str, dbt_dir: str, models: str, output_dir: str, schemas: str) -> None:
+    """
+    Generate LookML files from a dbt project.
+    """
+
+    print(f'Using dbt-dir {dbt_dir} and outputting to {output_dir}')
+
     # Can we get some configs from dbt_project.yml?
     files = FileManager(output_dir)
     generator = LookMLGenerator(connection_name, dbt_dir)
@@ -62,11 +68,12 @@ def main(connection_name: str, dbt_dir: str, models: str, output_dir: str, schem
 
 @click.command()
 @click.option('-c', '--test-content', 'test_content', default=False, help='Run content validation', type=click.BOOL)
-@click.option('-l', '--looker-dir', 'looker_dir', default='./', help='Location of directory LookML repo. Default is "./"', type=click.STRING)
-@click.option('-p', '--project-name', 'project_name', help='Name of project in Looker', type=click.STRING)
+@click.option('-l', '--looker-dir', 'looker_dir', default='./', help='Location of directory LookML repo. Does not resolve "~/". Default is "./"', type=click.Path(exists=True, file_okay=False))
+@click.option('-p', '--project-name', 'project_name', help='Name of project in Looker', required=True, type=click.STRING)
 def validate(looker_dir: str, project_name: str, test_content: bool) -> None:
+    """
+    Validate LookML using Looker validation tools.
+    Requires your local LookML branch to be pushed to origin (e.g. Github).
+    """
+    print(f'Running with looker-dir {looker_dir}')
     linter(looker_dir, project_name, test_content)
-
-
-if __name__ == '__main__':
-    main()

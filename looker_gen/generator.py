@@ -301,5 +301,5 @@ class LookMLGenerator:
         import_string = '/explores/{0}.explore.lkml'
         return {
             'connection': f'{self.connection_name}',
-            'includes': [import_string.format(e) for e in self.explores.keys()]
+            'includes': sorted([import_string.format(e) for e in self.explores.keys()])
         }

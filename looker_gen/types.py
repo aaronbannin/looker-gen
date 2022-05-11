@@ -1,3 +1,4 @@
+from __future__ import annotations
 from dataclasses import dataclass, asdict
 from typing import Any, Dict, List
 
@@ -6,6 +7,9 @@ from typing import Any, Dict, List
 class LookerType:
     name: str
     looker_args: Dict[str, Any]
+
+    def __lt__(self, other: LookerType) -> bool:
+        return self.name < other.name
 
     def as_dict(self) -> Dict:
         return {**self.looker_args, **asdict(self, dict_factory=lambda x: {k: v for (k, v) in x if v is not None and k != 'looker_args'})}
@@ -71,8 +75,8 @@ class View:
                 'name': self.name,
                 'sql_table_name': self.sql_table_name,
                 **{k:v for k, v in self.looker_args.items() if k != 'explore'},
-                'dimensions': [d.as_dict() for d in self.dimensions],
-                'dimension_groups': [d.as_dict() for d in self.dimension_groups],
-                'measures': [m.as_dict() for m in self.measures]
+                'dimensions': [d.as_dict() for d in sorted(self.dimensions)],
+                'dimension_groups': [d.as_dict() for d in sorted(self.dimension_groups)],
+                'measures': [m.as_dict() for m in sorted(self.measures)]
             }
         }
