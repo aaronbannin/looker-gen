@@ -9,4 +9,4 @@ jobs:
       - name: Run image
         uses: abatilo/actions-poetry@v2.0.0
       - name: View poetry --help
-        run: poetry --help
+        run: poetry black . --check
