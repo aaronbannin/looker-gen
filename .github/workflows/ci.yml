@@ -20,4 +20,4 @@ jobs:
       - name: Install
         run: poetry install
       - name: Linting
-        run: poetry black . --check
+        run: poetry run black . --check
