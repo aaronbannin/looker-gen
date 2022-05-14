@@ -12,12 +12,22 @@ class LookerType:
         return self.name < other.name
 
     def as_dict(self) -> Dict:
-        return {**self.looker_args, **asdict(self, dict_factory=lambda x: {k: v for (k, v) in x if v is not None and k != 'looker_args'})}
+        return {
+            **self.looker_args,
+            **asdict(
+                self,
+                dict_factory=lambda x: {
+                    k: v for (k, v) in x if v is not None and k != "looker_args"
+                },
+            ),
+        }
+
 
 @dataclass
 class JoinConfig(LookerType):
     def import_name(self) -> str:
-        return self.looker_args['from'] if 'from' in self.looker_args else self.name
+        return self.looker_args["from"] if "from" in self.looker_args else self.name
+
 
 @dataclass
 class ExploreConfig:
@@ -26,27 +36,29 @@ class ExploreConfig:
     looker_args: Dict[str, Any]
 
     def import_name(self) -> str:
-        return self.looker_args['from'] if 'from' in self.looker_args else self.name
+        return self.looker_args["from"] if "from" in self.looker_args else self.name
 
     def as_dict(self) -> Dict:
         # TODO: views dir should be parametized
-        import_string = '/views/{0}.view.lkml'
+        import_string = "/views/{0}.view.lkml"
         # use a set to get unqiue values
         join_imports = list({import_string.format(j.import_name()) for j in self.joins})
 
         parent_import = import_string.format(self.import_name())
 
-        args = {**self.looker_args, 'name': self.name}
+        args = {**self.looker_args, "name": self.name}
         joins = [j.as_dict() for j in self.joins]
-        
+
         return {
-            'includes': [parent_import, *sorted(join_imports)],
-            'explore': {**args, 'joins': joins}
+            "includes": [parent_import, *sorted(join_imports)],
+            "explore": {**args, "joins": joins},
         }
+
 
 @dataclass
 class Dimension(LookerType):
     pass
+
 
 @dataclass
 class DimensionGroup(LookerType):
@@ -54,6 +66,7 @@ class DimensionGroup(LookerType):
     # TODO: make init only?
     timeframes: List[str]
     looker_args: Dict[str, Any]
+
 
 @dataclass
 class Measure(LookerType):
@@ -68,15 +81,17 @@ class View:
     dimension_groups: List[DimensionGroup]
     measures: List[Measure]
     looker_args: Dict[str, Any]
-    
+
     def as_dict(self) -> Dict:
         return {
-            'view': {
-                'name': self.name,
-                'sql_table_name': self.sql_table_name,
-                **{k:v for k, v in self.looker_args.items() if k != 'explore'},
-                'dimensions': [d.as_dict() for d in sorted(self.dimensions)],
-                'dimension_groups': [d.as_dict() for d in sorted(self.dimension_groups)],
-                'measures': [m.as_dict() for m in sorted(self.measures)]
+            "view": {
+                "name": self.name,
+                "sql_table_name": self.sql_table_name,
+                **{k: v for k, v in self.looker_args.items() if k != "explore"},
+                "dimensions": [d.as_dict() for d in sorted(self.dimensions)],
+                "dimension_groups": [
+                    d.as_dict() for d in sorted(self.dimension_groups)
+                ],
+                "measures": [m.as_dict() for m in sorted(self.measures)],
             }
         }
