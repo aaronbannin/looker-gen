@@ -24,4 +24,3 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry.scripts]
 gen = 'looker_gen.cli:gen'
 validate = 'looker_gen.cli:validate'
-lint-fix = 'poetry black .'
