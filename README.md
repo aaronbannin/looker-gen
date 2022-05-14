@@ -1,7 +1,9 @@
 Looker Gen
 ==========
 
-Generate LookML from a dbt project.
+Generate LookML from a dbt project. Reads from your dbt repo and outputs files; can output to your Looker repo.
+
+Currently in experimentation mode, very opinionated about output directory structure.
 
 ## Installation
 - Clone repo

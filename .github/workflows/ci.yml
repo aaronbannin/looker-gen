@@ -10,14 +10,11 @@ jobs:
         with:
           python-version: 3.8
 
-      # - name: Set up Python 3.7
-      #   uses: actions/setup-python@v1
-
       - name: Install Poetry
         uses: snok/install-poetry@v1.3
-      # - name: Run image
-      #   uses: abatilo/actions-poetry@v2.0.0
+
       - name: Install
         run: poetry install
+
       - name: Linting
         run: poetry run black . --check
