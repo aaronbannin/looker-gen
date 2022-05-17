@@ -25,7 +25,9 @@ def linter(looker_dir: str, project: str, test_content: bool) -> None:
     try:
         sdk.reset_project_to_remote(project)
     except Exception as e:
-        log.error('Unable to reset Looker to your current branch, did you push to remote?')
+        log.error(
+            "Unable to reset Looker to your current branch, did you push to remote?"
+        )
         raise e
 
     # lookml linting check

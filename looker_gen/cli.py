@@ -46,9 +46,7 @@ def get_schema_targets(schemas: str) -> Optional[Set[str]]:
     help="Build lookml only for the provided schemas, comma seperated list",
     type=click.STRING,
 )
-def gen(
-    dbt_dir: str, models: str, output_dir: str, schemas: str
-) -> None:
+def gen(dbt_dir: str, models: str, output_dir: str, schemas: str) -> None:
     """
     Generate LookML files from a dbt project.
     """
