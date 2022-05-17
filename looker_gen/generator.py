@@ -74,9 +74,7 @@ def _format_label(table_name: str) -> str:
 
 
 class LookMLGenerator:
-    def __init__(self, connection_name: str, dbt_dir: str) -> None:
-        self.connection_name = connection_name
-
+    def __init__(self, dbt_dir: str) -> None:
         project = FileManager.load_yaml(dbt_dir, "dbt_project.yml")
         dbt_target_location = os.path.join(dbt_dir, project["target-path"])
 
@@ -356,9 +354,8 @@ class LookMLGenerator:
 
         return explores
 
-    def build_model(self) -> Dict[str, Any]:
+    def build_explore_export(self) -> Dict[str, Any]:
         import_string = "/explores/{0}.explore.lkml"
         return {
-            "connection": f"{self.connection_name}",
             "includes": sorted([import_string.format(e) for e in self.explores.keys()]),
         }

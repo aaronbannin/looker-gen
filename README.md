@@ -40,12 +40,17 @@ This will output generated files with to output destination with the following s
 ```
 LookMLRepo/
 ├─ explores/
+│  ├─ looker-gen.explore.lkml
 │  ├─ ....explore.lkml
-├─ models/
-│  ├─ looker-gen.model.lkml
 ├─ views/
    ├─ ....view.lkml
 ```
+
+To use within Looker, simply add this to your `*.models.lkml` file:
+```
+include: "/explores/looker-gen.explore.lkml"
+```
+
 
 ### Optional: Valiate Looker Project
 The `poetry run validate` command can validate your LookML repo with Looker's linter ("LookML Validation") and content validation.

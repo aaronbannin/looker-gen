@@ -11,10 +11,9 @@ class FileManager:
         self.output_dir = output_dir
         self.explores_dir = os.path.join(output_dir, "explores")
         self.views_dir = os.path.join(output_dir, "views")
-        self.models_dir = os.path.join(output_dir, "models")
 
         # provision output dirs
-        for dir in [self.explores_dir, self.views_dir, self.models_dir]:
+        for dir in [self.explores_dir, self.views_dir]:
             if not os.path.exists(dir):
                 os.makedirs(dir)
 

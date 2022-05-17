@@ -22,7 +22,13 @@ def linter(looker_dir: str, project: str, test_content: bool) -> None:
         sdk.create_git_branch(project, WriteGitBranch(name=local_branch))
 
     # git pull from remote
-    sdk.reset_project_to_remote(project)
+    try:
+        sdk.reset_project_to_remote(project)
+    except Exception as e:
+        log.error(
+            "Unable to reset Looker to your current branch, did you push to remote?"
+        )
+        raise e
 
     # lookml linting check
     validation = sdk.validate_project(project)

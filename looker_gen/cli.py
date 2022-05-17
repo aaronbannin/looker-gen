@@ -19,14 +19,6 @@ def get_schema_targets(schemas: str) -> Optional[Set[str]]:
 
 @click.command()
 @click.option(
-    "-c",
-    "--connection-name",
-    "connection_name",
-    help="Name of DB connection in Looker",
-    required=True,
-    type=click.STRING,
-)
-@click.option(
     "-d",
     "--dbt-dir",
     "dbt_dir",
@@ -54,9 +46,7 @@ def get_schema_targets(schemas: str) -> Optional[Set[str]]:
     help="Build lookml only for the provided schemas, comma seperated list",
     type=click.STRING,
 )
-def gen(
-    connection_name: str, dbt_dir: str, models: str, output_dir: str, schemas: str
-) -> None:
+def gen(dbt_dir: str, models: str, output_dir: str, schemas: str) -> None:
     """
     Generate LookML files from a dbt project.
     """
@@ -65,7 +55,7 @@ def gen(
 
     # Can we get some configs from dbt_project.yml?
     files = FileManager(output_dir)
-    generator = LookMLGenerator(connection_name, dbt_dir)
+    generator = LookMLGenerator(dbt_dir)
     model_targets = generator.get_model_targets(models)
     schema_targets = get_schema_targets(schemas=schemas)
 
@@ -96,9 +86,9 @@ def gen(
             with open(explore_path, "w") as explore_file:
                 lkml.dump(explore, explore_file)
 
-        models = generator.build_model()
-        models_name = "looker-gen.model.lkml"
-        models_path = os.path.join(files.models_dir, models_name)
+        models = generator.build_explore_export()
+        explore_export_name = "looker-gen.explore.lkml"
+        models_path = os.path.join(files.explores_dir, explore_export_name)
         with open(models_path, "w") as modelfile:
             lkml.dump(models, modelfile)
 
