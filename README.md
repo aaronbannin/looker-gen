@@ -29,10 +29,8 @@ Note: `dbt run` can replace `compile`. To ensure that LookML columns matches dat
 
 `$LOOKER_DIR` = Directory of LookML repo
 
-`$CONNECTION_NAME` = Database connection name defined in Looker. This is require for the `/models` file to generate properly.
-
 ```
-poetry run looker-gen -d $DBT_DIR -o $LOOKER_DIR -c $CONNECTION_NAME
+poetry run gen -d $DBT_DIR -o $LOOKER_DIR
 ```
 
 This will output generated files with to output destination with the following structure:
