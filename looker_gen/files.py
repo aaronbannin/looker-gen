@@ -29,7 +29,7 @@ class FileManager:
     def load_yaml(prefix: str, name: str) -> Dict:
         path = Path(prefix).joinpath(name)
         with open(path, "r") as f:
-            return yaml.safe_load(f, Loader=yaml.Loader)
+            return yaml.safe_load(f)
 
     @staticmethod
     def build_models_dir_mapping(
