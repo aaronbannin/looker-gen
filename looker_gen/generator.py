@@ -1,6 +1,5 @@
 from typing import Any, Dict, List
 
-import os
 from pathlib import Path
 
 from looker_gen.files import FileManager
@@ -80,7 +79,7 @@ class LookMLGenerator:
     def __init__(self, dbt_dir: str) -> None:
         dbt_path = Path(dbt_dir)
         project = FileManager.load_yaml(dbt_dir, "dbt_project.yml")
-        dbt_target_location = os.path.join(dbt_dir, project["target-path"])
+        dbt_target_location = dbt_path.joinpath(project["target-path"])
         models_dirs = project.get("model-paths", ["models"])
 
         self.project_name = project["name"]

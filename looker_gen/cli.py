@@ -1,4 +1,3 @@
-import os
 from typing import Optional, Set
 
 import click
@@ -74,7 +73,7 @@ def gen(dbt_dir: str, models: str, output_dir: str, schemas: str) -> None:
         # TODO: save in schema dirs
         # save to file
         view_name = "{0}.view.lkml".format(view.name)
-        view_path = os.path.join(files.views_dir, view_name)
+        view_path = files.views_dir.joinpath(view_name)
         with open(view_path, "w") as outfile:
             lkml.dump(view.as_dict(), outfile)
 
@@ -82,13 +81,13 @@ def gen(dbt_dir: str, models: str, output_dir: str, schemas: str) -> None:
         if table_name in generator.explores:
             explore = generator.explores[table_name].as_dict()
             explore_file = "{0}.explore.lkml".format(table_name)
-            explore_path = os.path.join(files.explores_dir, explore_file)
+            explore_path = files.explores_dir.joinpath(explore_file)
             with open(explore_path, "w") as explore_file:
                 lkml.dump(explore, explore_file)
 
         models = generator.build_explore_export()
         explore_export_name = "looker-gen.explore.lkml"
-        models_path = os.path.join(files.explores_dir, explore_export_name)
+        models_path = files.explores_dir.joinpath(explore_export_name)
         with open(models_path, "w") as modelfile:
             lkml.dump(models, modelfile)
 
