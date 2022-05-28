@@ -105,12 +105,6 @@ class LookMLGenerator:
             self.get_node_name(k): v for k, v in tmp_dir_mapping.items()
         }
 
-        for node_name in self.manifest["nodes"].keys():
-            if node_name not in self.models_dir_mapping and node_name.startswith(
-                "model.miro."
-            ):
-                print(f"{node_name} not found")
-
         # build explores
         self.explores = self.build_explores()
 
