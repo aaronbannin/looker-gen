@@ -3,6 +3,9 @@ from dataclasses import dataclass, asdict
 from typing import Any, Dict, List
 
 
+ModelName = str
+NodeName = str
+
 @dataclass
 class LookerType:
     name: str
@@ -31,7 +34,7 @@ class JoinConfig(LookerType):
 
 @dataclass
 class ExploreConfig:
-    name: str
+    name: ModelName
     joins: List[JoinConfig]
     looker_args: Dict[str, Any]
 

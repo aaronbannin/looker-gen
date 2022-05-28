@@ -38,7 +38,7 @@ def get_schema_targets(schemas: str) -> Optional[Set[str]]:
     "output_dir",
     default="./lookml",
     help='Destination for generated LookML files; using your current LookML repo is encouraged. Does not resolve "~/". Default is "./lookml"',
-    type=click.Path(exists=True, file_okay=False),
+    type=click.Path(file_okay=False),
 )
 @click.option(
     "-s",

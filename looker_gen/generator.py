@@ -1,6 +1,7 @@
 from typing import Any, Dict, List
 
 import os
+from pathlib import Path
 
 from looker_gen.files import FileManager
 from looker_gen.logging import log
@@ -10,6 +11,8 @@ from looker_gen.types import (
     ExploreConfig,
     JoinConfig,
     Measure,
+    ModelName,
+    NodeName,
     View,
 )
 
@@ -57,7 +60,7 @@ SNOWFLAKE_TYPE_CONVERSIONS = {
 LOOKER_DIM_GROUP_TYPES = ["time", "duration"]
 
 
-def _get_model_name(node_name: str) -> str:
+def _get_model_name(node_name: NodeName) -> ModelName:
     return node_name.split(".")[2]
 
 
@@ -75,8 +78,10 @@ def _format_label(table_name: str) -> str:
 
 class LookMLGenerator:
     def __init__(self, dbt_dir: str) -> None:
+        dbt_path = Path(dbt_dir)
         project = FileManager.load_yaml(dbt_dir, "dbt_project.yml")
         dbt_target_location = os.path.join(dbt_dir, project["target-path"])
+        models_dirs = project.get("model-paths", ["models"])
 
         self.project_name = project["name"]
 
@@ -96,6 +101,13 @@ class LookMLGenerator:
             }
             self.manifest["nodes"][node_name]["columns"] = formatted
 
+        tmp_dir_mapping = FileManager.build_models_dir_mapping(dbt_path, models_dirs)
+        self.models_dir_mapping = {self.get_node_name(k): v for k, v in tmp_dir_mapping.items()}
+
+        for node_name in self.manifest["nodes"].keys():
+            if node_name not in self.models_dir_mapping and node_name.startswith('model.miro.'):
+                print(f'{node_name} not found')
+
         # build explores
         self.explores = self.build_explores()
 
@@ -105,16 +117,16 @@ class LookMLGenerator:
 
         return {self.get_node_name(m.lower().strip()) for m in models.split(",")}
 
-    def get_node_name(self, table_name: str) -> str:
+    def get_node_name(self, table_name: str) -> NodeName:
         return f"model.{self.project_name}.{table_name}"
 
-    def get_catalog_for_node(self, node_name: str) -> Dict:
+    def get_catalog_for_node(self, node_name: NodeName) -> Dict:
         return self.catalog["nodes"][node_name]["columns"]
 
-    def get_manifest_for_node(self, node_name: str) -> Dict:
+    def get_manifest_for_node(self, node_name: NodeName) -> Dict:
         return self.manifest["nodes"][node_name]["columns"]
 
-    def get_column_config(self, node_name: str, column_name: str) -> Dict[str, Any]:
+    def get_column_config(self, node_name: NodeName, column_name: str) -> Dict[str, Any]:
         if column_name in self.manifest["nodes"][node_name]["columns"]:
             return self.manifest["nodes"][node_name]["columns"][column_name][
                 "meta"
@@ -122,12 +134,12 @@ class LookMLGenerator:
 
         return dict()
 
-    def get_table_config(self, node_name: str) -> Dict[str, Any]:
+    def get_table_config(self, node_name: NodeName) -> Dict[str, Any]:
         return self.manifest["nodes"][node_name]["config"]["meta"].get(
             "looker-gen", dict()
         )
 
-    def is_dimension(self, node_name: str, column_name: str, catalog: Dict) -> bool:
+    def is_dimension(self, node_name: NodeName, column_name: str, catalog: Dict) -> bool:
         config = self.get_column_config(node_name, column_name)
         ignored = "ignore-dim" in config
         if (
@@ -139,7 +151,7 @@ class LookMLGenerator:
         return True
 
     def is_dimension_group(
-        self, node_name: str, column_name: str, catalog: Dict
+        self, node_name: NodeName, column_name: str, catalog: Dict
     ) -> bool:
         config = self.get_column_config(node_name, column_name)
         ignored = "ignore-dim" in config
@@ -151,7 +163,7 @@ class LookMLGenerator:
 
         return False
 
-    def is_custom_dimension(self, node_name: str, column_name: str) -> bool:
+    def is_custom_dimension(self, node_name: NodeName, column_name: str) -> bool:
         manifest = self.get_manifest_for_node(node_name)
 
         # Column has no declaration in dbt
@@ -169,7 +181,7 @@ class LookMLGenerator:
 
         return False
 
-    def build_dimension(self, node_name: str, column_name: str) -> Dimension:
+    def build_dimension(self, node_name: NodeName, column_name: str) -> Dimension:
         args = {}
 
         catalog = self.get_catalog_for_node(node_name)
@@ -211,7 +223,7 @@ class LookMLGenerator:
 
         return Dimension(config["name"], args)
 
-    def build_dimensions_for_table(self, node_name: str) -> List[Dimension]:
+    def build_dimensions_for_table(self, node_name: NodeName) -> List[Dimension]:
         columns = self.get_catalog_for_node(node_name=node_name)
 
         dims = [
@@ -222,7 +234,7 @@ class LookMLGenerator:
 
         return dims
 
-    def build_dimension_group(self, node_name: str, column_name: str) -> DimensionGroup:
+    def build_dimension_group(self, node_name: NodeName, column_name: str) -> DimensionGroup:
         timeframes = ["raw", "time", "hour", "date", "week", "month", "quarter", "year"]
         dim = self.build_dimension(node_name=node_name, column_name=column_name)
 
@@ -230,7 +242,7 @@ class LookMLGenerator:
             name=dim.name, timeframes=timeframes, looker_args=dim.looker_args
         )
 
-    def build_dimension_groups_for_table(self, node_name: str) -> List[DimensionGroup]:
+    def build_dimension_groups_for_table(self, node_name: NodeName) -> List[DimensionGroup]:
         columns = self.get_catalog_for_node(node_name=node_name)
         dim_groups = [
             self.build_dimension_group(node_name=node_name, column_name=k)
@@ -240,7 +252,7 @@ class LookMLGenerator:
 
         return dim_groups
 
-    def build_measures(self, node_name: str, column_name: str) -> List[Measure]:
+    def build_measures(self, node_name: NodeName, column_name: str) -> List[Measure]:
         config = self.get_column_config(node_name, column_name)
         manifest = self.get_manifest_for_node(node_name)
         catalog = self.get_catalog_for_node(node_name)
@@ -268,7 +280,7 @@ class LookMLGenerator:
 
         return []
 
-    def build_measures_for_table(self, node_name: str) -> List[Measure]:
+    def build_measures_for_table(self, node_name: NodeName) -> List[Measure]:
         manifest = self.get_manifest_for_node(node_name)
         count = Measure("count", {"type": "count"})
         nested_measures = [
@@ -279,7 +291,7 @@ class LookMLGenerator:
         flatten.append(count)
         return flatten
 
-    def build_view_from_node(self, node_name: str) -> View:
+    def build_view_from_node(self, node_name: NodeName) -> View:
         catalog = self.get_catalog_for_node(node_name)
         manifest = self.get_manifest_for_node(node_name)
 
@@ -314,7 +326,7 @@ class LookMLGenerator:
         )
 
     def build_explore_from_config(
-        self, model_name: str, table_config: Dict[str, Any]
+        self, model_name: ModelName, table_config: Dict[str, Any]
     ) -> ExploreConfig:
         def join_config_from_dict(join: Dict[str, Any]) -> JoinConfig:
             looker_args = {k: v for k, v in join.items() if k != "name"}
@@ -344,7 +356,7 @@ class LookMLGenerator:
     def build_explores(self) -> Dict[str, ExploreConfig]:
         explores: Dict[str, ExploreConfig] = {}
 
-        for node_name, node in self.manifest["nodes"].items():
+        for node_name in self.manifest["nodes"].keys():
             model_name = _get_model_name(node_name)
             config = self.get_table_config(node_name)
 
