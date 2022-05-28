@@ -1,8 +1,8 @@
 # Generated files
 lookml/
 
-# Looker config
-looker.ini
+# Configs
+*.ini
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
