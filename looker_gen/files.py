@@ -32,7 +32,9 @@ class FileManager:
             return yaml.load(f, Loader=yaml.Loader)
 
     @staticmethod
-    def build_models_dir_mapping(dbt_path: Path, models_dirs: List[str]) -> Dict[ModelName, Path]:
+    def build_models_dir_mapping(
+        dbt_path: Path, models_dirs: List[str]
+    ) -> Dict[ModelName, Path]:
         models = dbt_path.joinpath(models_dirs[0]).glob("**/*")
         return {m.stem: m for m in models if m.suffix == ".sql"}
 

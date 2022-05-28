@@ -101,11 +101,15 @@ class LookMLGenerator:
             self.manifest["nodes"][node_name]["columns"] = formatted
 
         tmp_dir_mapping = FileManager.build_models_dir_mapping(dbt_path, models_dirs)
-        self.models_dir_mapping = {self.get_node_name(k): v for k, v in tmp_dir_mapping.items()}
+        self.models_dir_mapping = {
+            self.get_node_name(k): v for k, v in tmp_dir_mapping.items()
+        }
 
         for node_name in self.manifest["nodes"].keys():
-            if node_name not in self.models_dir_mapping and node_name.startswith('model.miro.'):
-                print(f'{node_name} not found')
+            if node_name not in self.models_dir_mapping and node_name.startswith(
+                "model.miro."
+            ):
+                print(f"{node_name} not found")
 
         # build explores
         self.explores = self.build_explores()
@@ -125,7 +129,9 @@ class LookMLGenerator:
     def get_manifest_for_node(self, node_name: NodeName) -> Dict:
         return self.manifest["nodes"][node_name]["columns"]
 
-    def get_column_config(self, node_name: NodeName, column_name: str) -> Dict[str, Any]:
+    def get_column_config(
+        self, node_name: NodeName, column_name: str
+    ) -> Dict[str, Any]:
         if column_name in self.manifest["nodes"][node_name]["columns"]:
             return self.manifest["nodes"][node_name]["columns"][column_name][
                 "meta"
@@ -138,7 +144,9 @@ class LookMLGenerator:
             "looker-gen", dict()
         )
 
-    def is_dimension(self, node_name: NodeName, column_name: str, catalog: Dict) -> bool:
+    def is_dimension(
+        self, node_name: NodeName, column_name: str, catalog: Dict
+    ) -> bool:
         config = self.get_column_config(node_name, column_name)
         ignored = "ignore-dim" in config
         if (
@@ -233,7 +241,9 @@ class LookMLGenerator:
 
         return dims
 
-    def build_dimension_group(self, node_name: NodeName, column_name: str) -> DimensionGroup:
+    def build_dimension_group(
+        self, node_name: NodeName, column_name: str
+    ) -> DimensionGroup:
         timeframes = ["raw", "time", "hour", "date", "week", "month", "quarter", "year"]
         dim = self.build_dimension(node_name=node_name, column_name=column_name)
 
@@ -241,7 +251,9 @@ class LookMLGenerator:
             name=dim.name, timeframes=timeframes, looker_args=dim.looker_args
         )
 
-    def build_dimension_groups_for_table(self, node_name: NodeName) -> List[DimensionGroup]:
+    def build_dimension_groups_for_table(
+        self, node_name: NodeName
+    ) -> List[DimensionGroup]:
         columns = self.get_catalog_for_node(node_name=node_name)
         dim_groups = [
             self.build_dimension_group(node_name=node_name, column_name=k)

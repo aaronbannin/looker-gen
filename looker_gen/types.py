@@ -6,6 +6,7 @@ from typing import Any, Dict, List
 ModelName = str
 NodeName = str
 
+
 @dataclass
 class LookerType:
     name: str
