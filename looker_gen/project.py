@@ -5,6 +5,7 @@ from looker_gen import config, ViewDirectoryStructure
 from looker_gen.files import FileManager
 from looker_gen.types import ModelName, NodeName, View
 
+
 class DBTProject:
     def __init__(self, dbt_dir) -> None:
         self.dbt_path = Path(dbt_dir)
@@ -66,7 +67,7 @@ class DBTProject:
             metadata = self.get_catalog_metadata_for_node(node_name)
             relative_path = Path(f'{metadata["database"]}/{metadata["schema"]}'.lower())
             return relative_path
-        
+
         else:
             raise ValueError("Unable to build path for view directory config")
 

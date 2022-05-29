@@ -60,7 +60,9 @@ def gen(dbt_dir: str, models: str, output_dir: str, schemas: str) -> None:
 
     for node_name in model_targets:
         log.debug(f"begin node={node_name}")
-        schema = str(generator.project.get_catalog_metadata_for_node(node_name)["schema"])
+        schema = str(
+            generator.project.get_catalog_metadata_for_node(node_name)["schema"]
+        )
 
         if schema_targets is not None and schema.lower() not in schema_targets:
             log.debug(
@@ -120,6 +122,6 @@ def validate(looker_dir: str, project_name: str, test_content: bool) -> None:
     Validate LookML using Looker validation tools.
     Requires your local LookML branch to be pushed to origin (e.g. Github).
     """
-    
+
     print(f"Running with looker-dir {looker_dir}")
     linter(looker_dir, project_name, test_content)
