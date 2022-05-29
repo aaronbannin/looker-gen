@@ -28,7 +28,7 @@ class ViewDirectoryStructure(Enum):
 
     flat = "flat"
     dbt = "dbt"
-    db = "db"
+    database = "database"
 
 
 @dataclass(frozen=True)
@@ -50,7 +50,8 @@ def import_config() -> Config:
     log.debug(f"Looking for configs in file {CONFIG_FILE_NAME}")
 
     try:
-        view_dir_structure = ViewDirectoryStructure(parser["views"]["dir_structure"])
+        dir_config = parser["views"]["dir_structure"]
+        view_dir_structure = ViewDirectoryStructure(dir_config)
     except:
         view_dir_structure = ViewDirectoryStructure.flat
 

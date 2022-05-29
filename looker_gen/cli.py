@@ -4,7 +4,7 @@ import click
 import lkml
 
 from looker_gen.files import FileManager
-from looker_gen.generator import LookMLGenerator, _get_model_name
+from looker_gen.generator import LookMLGenerator
 from looker_gen.logging import log
 from looker_gen.looker import linter
 
@@ -60,7 +60,7 @@ def gen(dbt_dir: str, models: str, output_dir: str, schemas: str) -> None:
 
     for node_name in model_targets:
         log.debug(f"begin node={node_name}")
-        schema = str(generator.project.catalog["nodes"][node_name]["metadata"]["schema"])
+        schema = str(generator.project.get_catalog_metadata_for_node(node_name)["schema"])
 
         if schema_targets is not None and schema.lower() not in schema_targets:
             log.debug(
@@ -70,16 +70,12 @@ def gen(dbt_dir: str, models: str, output_dir: str, schemas: str) -> None:
 
         view = generator.build_view_from_node(node_name)
 
-        # TODO: save in schema dirs
-        # save to file
-        # view_name = "{0}.view.lkml".format(view.name)
-        # view_path = files.views_dir.joinpath(view_name)
         view_path = generator.project.build_view_path(files, view)
-        log.info(f'Using view_path {view_path}')
+        log.info(f"Using view_path {view_path}")
         with open(view_path, "w") as outfile:
             lkml.dump(view.as_dict(), outfile)
 
-        table_name = _get_model_name(node_name)
+        table_name = generator.project.get_model_name(node_name)
         if table_name in generator.explores:
             explore = generator.explores[table_name].as_dict()
             explore_file = "{0}.explore.lkml".format(table_name)
@@ -124,5 +120,6 @@ def validate(looker_dir: str, project_name: str, test_content: bool) -> None:
     Validate LookML using Looker validation tools.
     Requires your local LookML branch to be pushed to origin (e.g. Github).
     """
+    
     print(f"Running with looker-dir {looker_dir}")
     linter(looker_dir, project_name, test_content)
