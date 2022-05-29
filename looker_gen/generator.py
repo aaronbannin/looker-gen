@@ -111,7 +111,7 @@ class LookMLGenerator:
 
     def get_model_targets(self, models: str) -> List[str]:
         if models is None:
-            return self.project.catalog["nodes"].keys()
+            return [k for k in self.project.catalog["nodes"].keys() if k.startswith(self.project.model_prefix)]
 
         return {self.project.get_node_name(m.lower().strip()) for m in models.split(",")}
 

@@ -46,12 +46,13 @@ class FileManager:
 
 class DBTProject:
     def __init__(self, dbt_dir) -> None:
-        dbt_path = Path(dbt_dir)
+        self.dbt_path = Path(dbt_dir)
         project = FileManager.load_yaml(dbt_dir, "dbt_project.yml")
-        dbt_target_location = dbt_path.joinpath(project["target-path"])
+        dbt_target_location = self.dbt_path.joinpath(project["target-path"])
         models_dirs = project.get("model-paths", ["models"])
 
         self.project_name = project["name"]
+        self.model_prefix = f"model.{self.project_name}"
 
         self.catalog = FileManager.load_json(dbt_target_location, "catalog.json")
         self.manifest = FileManager.load_json(dbt_target_location, "manifest.json")
@@ -69,7 +70,7 @@ class DBTProject:
             }
             self.manifest["nodes"][node_name]["columns"] = formatted
 
-        tmp_dir_mapping = FileManager.build_models_dir_mapping(dbt_path, models_dirs)
+        tmp_dir_mapping = FileManager.build_models_dir_mapping(self.dbt_path, models_dirs)
         self.models_dir_mapping = tmp_dir_mapping
         print(self.models_dir_mapping)
         # self.models_dir_mapping = {
@@ -77,7 +78,7 @@ class DBTProject:
         # }
 
     def get_node_name(self, table_name: str) -> NodeName:
-        return f"model.{self.project_name}.{table_name}"
+        return f"{self.model_prefix}.{table_name}"
 
     def get_catalog_for_node(self, node_name: NodeName) -> Dict:
         return self.catalog["nodes"][node_name]["columns"]
@@ -87,15 +88,16 @@ class DBTProject:
 
     def build_view_path(self, files: FileManager, view: View) -> Path:
         file_name = "{0}.view.lkml".format(view.name)
-        print(f'building path for {view}')
-        # print(self.models_dir_mapping)
+
         if config.view_dir_structure == ViewDirectoryStructure.flat:
             return files.views_dir.joinpath(file_name)
         elif config.view_dir_structure == ViewDirectoryStructure.dbt:
-            print("use dbt!!!")
             project_path = self.models_dir_mapping[view.name]
-            # path = project_path.relative_to()
-            print(f'path=f{project_path}')
-            
-            # change this; keep working during dev
-            return files.views_dir.joinpath(file_name)
+            relative_path = project_path.relative_to(self.dbt_path)
+            path = files.views_dir.joinpath(relative_path)
+            print(f'path={path}')
+
+            if not path.parent.exists():
+                path.parent.mkdir(parents=True)
+
+            return path
