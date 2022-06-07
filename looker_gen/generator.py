@@ -261,6 +261,7 @@ class LookMLGenerator:
     def build_view_from_node(self, node_name: NodeName,  files: FileManager) -> View:
         catalog = self.project.get_catalog_for_node(node_name)
         manifest = self.project.get_manifest_for_node(node_name)
+        model_name = self.project.get_model_name(node_name)
 
         # find columns in manifest that do not exist in db catalog
         diff = set(manifest.keys()).difference(set(catalog.keys()))
@@ -284,7 +285,11 @@ class LookMLGenerator:
         dimension_groups = self.build_dimension_groups_for_table(node_name)
         measures = self.build_measures_for_table(node_name)
 
-        file_path = self.project.build_view_path(node_name, files)
+        relative_path = self.project.build_view_path(model_name)
+        path = files.fully_qualified_view_path(relative_path)
+
+        if not path.parent.exists():
+            path.parent.mkdir(parents=True)
 
         return View(
             table.lower(),
@@ -293,14 +298,14 @@ class LookMLGenerator:
             dimensions=dimensions,
             dimension_groups=dimension_groups,
             measures=measures,
-            file_path=file_path
+            file_path=path
         )
 
     def build_explore_config(
         self, model_name: ModelName, table_config: Dict[str, Any]
     ) -> ExploreConfig:
         def join_config_from_dict(join: Dict[str, Any]) -> JoinConfig:
-            relative_path = self.project.build_view_path_for_explore(join["name"])
+            relative_path = self.project.build_view_path(join["name"])
             looker_args = {k: v for k, v in join.items() if k != "name"}
             return JoinConfig(join["name"], looker_args, relative_path)
 
@@ -341,8 +346,8 @@ class LookMLGenerator:
         return explores
 
     def build_explore_from_config(self, config: ExploreConfig, files: FileManager) -> Dict[str, Any]:
-        join_imports = list(str(files.views_dir.joinpath(j.relative_path)) for j in config.joins)
-        parent_import = str(files.views_dir.joinpath(self.project.build_view_path_for_explore(config.name)))
+        join_imports = list(str(files.fully_qualified_view_path(j.relative_path) for j in config.joins))
+        parent_import = str(files.fully_qualified_view_path(self.project.build_view_path(config.name)))
 
         args = {**config.looker_args, "name": config.name}
         joins = [j.as_dict() for j in config.joins]
@@ -351,7 +356,6 @@ class LookMLGenerator:
             "includes": [parent_import, *sorted(join_imports)],
             "explore": {**args, "joins": joins},
         }
-
 
     def build_explore_export(self) -> Dict[str, Any]:
         import_string = "/explores/{0}.explore.lkml"

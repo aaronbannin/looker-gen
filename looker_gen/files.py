@@ -41,3 +41,6 @@ class FileManager:
     def verify_output_dir(self) -> None:
         if not self.output_dir.exists():
             raise Exception(f"Cannon find destination {self.output_dir}")
+
+    def fully_qualified_view_path(self, relative_path: Path) -> Path:
+        return self.views_dir.joinpath(relative_path)

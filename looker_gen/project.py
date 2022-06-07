@@ -70,21 +70,9 @@ class DBTProject:
         else:
             raise ValueError("Unable to build path for view directory config")
 
-    def build_view_path_for_explore(self, model_name: ModelName) -> Path:
+    def build_view_path(self, model_name: ModelName) -> Path:
         file_name = f"{model_name}.view.lkml"
         node_name = self.get_node_name(model_name)
+
         relative_path = self._build_view_relative_path(node_name)
         return relative_path.joinpath(file_name)
-
-
-    def build_view_path(self, node_name: NodeName, files: FileManager) -> Path:
-        model_name = self.get_model_name(node_name)
-        file_name = "{0}.view.lkml".format(model_name)
-
-        relative_path = self._build_view_relative_path(node_name)
-        path = files.views_dir.joinpath(relative_path).joinpath(file_name)
-
-        if not path.parent.exists():
-            path.parent.mkdir(parents=True)
-
-        return path      
