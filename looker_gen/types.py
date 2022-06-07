@@ -23,7 +23,9 @@ class LookerType:
                 self,
                 dict_factory=lambda x: {
                     # filter out protected keys
-                    k: v for (k, v) in x if v is not None and k not in {"looker_args", "relative_path"}
+                    k: v
+                    for (k, v) in x
+                    if v is not None and k not in {"looker_args", "relative_path"}
                 },
             ),
         }

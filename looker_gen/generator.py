@@ -258,7 +258,7 @@ class LookMLGenerator:
         flatten.append(count)
         return flatten
 
-    def build_view_from_node(self, node_name: NodeName,  files: FileManager) -> View:
+    def build_view_from_node(self, node_name: NodeName, files: FileManager) -> View:
         catalog = self.project.get_catalog_for_node(node_name)
         manifest = self.project.get_manifest_for_node(node_name)
         model_name = self.project.get_model_name(node_name)
@@ -298,7 +298,7 @@ class LookMLGenerator:
             dimensions=dimensions,
             dimension_groups=dimension_groups,
             measures=measures,
-            file_path=path
+            file_path=path,
         )
 
     def build_explore_config(
@@ -311,7 +311,6 @@ class LookMLGenerator:
 
         if table_config["explore"] is None:
             return ExploreConfig(model_name, [], {})
-
 
         join_configs = table_config.get("explore", {}).get("joins", {})
         joins = [join_config_from_dict(j) for j in join_configs]
@@ -345,9 +344,15 @@ class LookMLGenerator:
 
         return explores
 
-    def build_explore_from_config(self, config: ExploreConfig, files: FileManager) -> Dict[str, Any]:
-        join_imports = list(str(files.fully_qualified_view_path(j.relative_path) for j in config.joins))
-        parent_import = str(files.fully_qualified_view_path(self.project.build_view_path(config.name)))
+    def build_explore_from_config(
+        self, config: ExploreConfig, files: FileManager
+    ) -> Dict[str, Any]:
+        join_imports = list(
+            str(files.fully_qualified_view_path(j.relative_path) for j in config.joins)
+        )
+        parent_import = str(
+            files.fully_qualified_view_path(self.project.build_view_path(config.name))
+        )
 
         args = {**config.looker_args, "name": config.name}
         joins = [j.as_dict() for j in config.joins]

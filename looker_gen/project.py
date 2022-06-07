@@ -57,7 +57,7 @@ class DBTProject:
         manifest = self.manifest["nodes"][node_name]
 
         if config.view_dir_structure == ViewDirectoryStructure.flat:
-            return self.dbt_path.joinpath('views')
+            return self.dbt_path.joinpath("views")
 
         elif config.view_dir_structure == ViewDirectoryStructure.dbt:
             relative_path = Path(manifest["path"])
