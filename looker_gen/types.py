@@ -22,6 +22,7 @@ class LookerType:
             **asdict(
                 self,
                 dict_factory=lambda x: {
+                    # filter out protected keys
                     k: v for (k, v) in x if v is not None and k not in {"looker_args", "relative_path"}
                 },
             ),
@@ -73,7 +74,6 @@ class View:
     dimension_groups: List[DimensionGroup]
     measures: List[Measure]
     looker_args: Dict[str, Any]
-    # TODO: this needs to be removed?
     file_path: Path
 
     def as_dict(self) -> Dict:

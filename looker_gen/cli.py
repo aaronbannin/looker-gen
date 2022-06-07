@@ -70,24 +70,20 @@ def gen(dbt_dir: str, models: str, output_dir: str, schemas: str) -> None:
             )
             continue
 
-        print('building view')
         view = generator.build_view_from_node(node_name, files)
-        print(view.file_path)
 
-        log.info(f"Using view_path {view.file_path}")
+        log.debug(f"Using view_path {view.file_path}")
         with open(view.file_path, "w") as outfile:
             lkml.dump(view.as_dict(), outfile)
 
         table_name = generator.project.get_model_name(node_name)
         if table_name in generator.explores:
-            log.info(f"Building {table_name} explore")
+            log.debug(f"Building {table_name} explore")
             explore_config = generator.explores[table_name]
             explore = generator.build_explore_from_config(explore_config, files)
             explore_file = "{0}.explore.lkml".format(table_name)
             explore_path = files.explores_dir.joinpath(explore_file)
             with open(explore_path, "w") as explore_file:
-                print("for the dump")
-                print(explore)
                 lkml.dump(explore, explore_file)
 
         models = generator.build_explore_export()
@@ -95,8 +91,6 @@ def gen(dbt_dir: str, models: str, output_dir: str, schemas: str) -> None:
         models_path = files.explores_dir.joinpath(explore_export_name)
         with open(models_path, "w") as modelfile:
             lkml.dump(models, modelfile)
-
-    print('fin')
 
 
 @click.command()
