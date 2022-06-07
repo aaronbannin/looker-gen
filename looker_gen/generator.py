@@ -300,8 +300,6 @@ class LookMLGenerator:
         self, model_name: ModelName, table_config: Dict[str, Any]
     ) -> ExploreConfig:
         def join_config_from_dict(join: Dict[str, Any]) -> JoinConfig:
-            # node_name = self.project.get_node_name(join["name"])
-            # relative_path = self.project._build_view_relative_path(node_name)
             relative_path = self.project.build_view_path_for_explore(join["name"])
             looker_args = {k: v for k, v in join.items() if k != "name"}
             return JoinConfig(join["name"], looker_args, relative_path)
@@ -332,7 +330,6 @@ class LookMLGenerator:
     def build_explores(self) -> Dict[str, ExploreConfig]:
         explores: Dict[str, ExploreConfig] = {}
 
-        # TODO: get relative path for view and save on explores object
         for node_name in self.project.manifest["nodes"].keys():
             model_name = self.project.get_model_name(node_name)
             config = self.get_table_config(node_name)
@@ -341,34 +338,14 @@ class LookMLGenerator:
                 explore = self.build_explore_config(model_name, config)
                 explores[model_name] = explore
 
-        # print(explores)
         return explores
 
-    def build_explore_from_config(self, config: ExploreConfig, files: FileManager):
-        print("build_explore_from_config")
-        print(config)
-
-        # def build_view_import(join: JoinConfig) -> str:
-        #     print()
-        #     return str(files.views_dir.joinpath(join.relative_path))
-
+    def build_explore_from_config(self, config: ExploreConfig, files: FileManager) -> Dict[str, Any]:
         join_imports = list(str(files.views_dir.joinpath(j.relative_path)) for j in config.joins)
         parent_import = str(files.views_dir.joinpath(self.project.build_view_path_for_explore(config.name)))
 
         args = {**config.looker_args, "name": config.name}
         joins = [j.as_dict() for j in config.joins]
-
-        # # TODO: views dir should be parametized
-        # import_string = "/views/{0}.view.lkml"
-        # # use a set to get unqiue values
-        # # TODO: use import_name to _build_view_relative_path for view
-        # # TODO: this logic needs to live somehere else, make this model dumber
-        # join_imports = list({import_string.format(j.import_name()) for j in self.joins})
-
-        # parent_import = import_string.format(self.import_name())
-
-        # args = {**self.looker_args, "name": self.name}
-        # joins = [j.as_dict() for j in self.joins]
 
         return {
             "includes": [parent_import, *sorted(join_imports)],

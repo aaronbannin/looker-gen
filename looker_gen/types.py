@@ -46,24 +46,6 @@ class ExploreConfig:
     def import_name(self) -> str:
         return self.looker_args["from"] if "from" in self.looker_args else self.name
 
-    def as_dict(self) -> Dict:
-        # TODO: views dir should be parametized
-        import_string = "/views/{0}.view.lkml"
-        # use a set to get unqiue values
-        # TODO: use import_name to _build_view_relative_path for view
-        # TODO: this logic needs to live somehere else, make this model dumber
-        join_imports = list({import_string.format(j.import_name()) for j in self.joins})
-
-        parent_import = import_string.format(self.import_name())
-
-        args = {**self.looker_args, "name": self.name}
-        joins = [j.as_dict() for j in self.joins]
-
-        return {
-            "includes": [parent_import, *sorted(join_imports)],
-            "explore": {**args, "joins": joins},
-        }
-
 
 @dataclass
 class Dimension(LookerType):
@@ -107,7 +89,3 @@ class View:
                 "measures": [m.as_dict() for m in sorted(self.measures)],
             }
         }
-
-# @dataclass
-# class Explore(LookerType):
-#     pass
