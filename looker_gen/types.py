@@ -1,5 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass, asdict
+from pathlib import Path
 from typing import Any, Dict, List
 
 
@@ -21,7 +22,7 @@ class LookerType:
             **asdict(
                 self,
                 dict_factory=lambda x: {
-                    k: v for (k, v) in x if v is not None and k != "looker_args"
+                    k: v for (k, v) in x if v is not None and k not in {"looker_args", "relative_path"}
                 },
             ),
         }
@@ -29,6 +30,8 @@ class LookerType:
 
 @dataclass
 class JoinConfig(LookerType):
+    relative_path: Path
+
     def import_name(self) -> str:
         return self.looker_args["from"] if "from" in self.looker_args else self.name
 
@@ -39,6 +42,7 @@ class ExploreConfig:
     joins: List[JoinConfig]
     looker_args: Dict[str, Any]
 
+    # TODO: change to get_*
     def import_name(self) -> str:
         return self.looker_args["from"] if "from" in self.looker_args else self.name
 
@@ -46,6 +50,8 @@ class ExploreConfig:
         # TODO: views dir should be parametized
         import_string = "/views/{0}.view.lkml"
         # use a set to get unqiue values
+        # TODO: use import_name to _build_view_relative_path for view
+        # TODO: this logic needs to live somehere else, make this model dumber
         join_imports = list({import_string.format(j.import_name()) for j in self.joins})
 
         parent_import = import_string.format(self.import_name())
@@ -85,6 +91,8 @@ class View:
     dimension_groups: List[DimensionGroup]
     measures: List[Measure]
     looker_args: Dict[str, Any]
+    # TODO: this needs to be removed?
+    file_path: Path
 
     def as_dict(self) -> Dict:
         return {
@@ -99,3 +107,7 @@ class View:
                 "measures": [m.as_dict() for m in sorted(self.measures)],
             }
         }
+
+# @dataclass
+# class Explore(LookerType):
+#     pass

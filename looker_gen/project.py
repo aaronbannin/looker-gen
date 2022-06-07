@@ -3,6 +3,7 @@ from typing import Dict
 
 from looker_gen import config, ViewDirectoryStructure
 from looker_gen.files import FileManager
+from looker_gen.logging import log
 from looker_gen.types import ModelName, NodeName, View
 
 
@@ -52,32 +53,58 @@ class DBTProject:
     def get_manifest_for_node(self, node_name: NodeName) -> Dict:
         return self.manifest["nodes"][node_name]["columns"]
 
-    def _build_view_dirs(self, view: View) -> Path:
-        # file_name = "{0}.view.lkml".format(view.name)
+    def _build_view_relative_path(self, node_name: NodeName) -> Path:
+        # node_name = self.get_node_name(view.name)
+        manifest = self.manifest["nodes"][node_name]
+        # manifest = self.get_manifest_for_node(node_name)
+        # print()
+
         if config.view_dir_structure == ViewDirectoryStructure.flat:
-            return Path()
+            return self.dbt_path.joinpath('views')
 
         elif config.view_dir_structure == ViewDirectoryStructure.dbt:
-            project_path = self.models_dir_mapping[view.name]
-            relative_path = project_path.relative_to(self.dbt_path)
-            return relative_path
+            # project_path = self.models_dir_mapping[view.name]
+            # relative_path = project_path.relative_to(self.dbt_path)
+            relative_path = Path(manifest["path"])
+            return relative_path.parent
 
         elif config.view_dir_structure == ViewDirectoryStructure.database:
-            node_name = self.get_node_name(view.name)
-            metadata = self.get_catalog_metadata_for_node(node_name)
-            relative_path = Path(f'{metadata["database"]}/{metadata["schema"]}'.lower())
+            # node_name = self.get_node_name(view.name)
+            # metadata = self.get_catalog_metadata_for_node(node_name)
+            relative_path = Path(f'{manifest["database"]}/{manifest["schema"]}'.lower())
             return relative_path
 
         else:
             raise ValueError("Unable to build path for view directory config")
 
-    def build_view_path(self, files: FileManager, view: View) -> Path:
-        file_name = "{0}.view.lkml".format(view.name)
+    # def build_view_path(self, files: FileManager, view: View) -> Path:
+    #     file_name = "{0}.view.lkml".format(view.name)
 
-        relative_path = self._build_view_dirs(view)
+    #     relative_path = self._build_view_dirs(view)
+    #     path = files.views_dir.joinpath(relative_path).joinpath(file_name)
+
+    #     if not path.parent.exists():
+    #         path.parent.mkdir(parents=True)
+
+    #     # log.error(f'{view.name} {path}')
+    #     return path
+
+    def build_view_path_for_explore(self, model_name: ModelName) -> Path:
+        file_name = f"{model_name}.view.lkml"
+        node_name = self.get_node_name(model_name)
+        relative_path = self._build_view_relative_path(node_name)
+        return relative_path.joinpath(file_name)
+
+
+    def build_view_path(self, node_name: NodeName, files: FileManager) -> Path:
+        model_name = self.get_model_name(node_name)
+        file_name = "{0}.view.lkml".format(model_name)
+
+        relative_path = self._build_view_relative_path(node_name)
         path = files.views_dir.joinpath(relative_path).joinpath(file_name)
 
         if not path.parent.exists():
             path.parent.mkdir(parents=True)
 
-        return path
+        # log.error(f'{view.name} {path}')
+        return path      
