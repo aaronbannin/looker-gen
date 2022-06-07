@@ -1,6 +1,11 @@
 from __future__ import annotations
 from dataclasses import dataclass, asdict
+from pathlib import Path
 from typing import Any, Dict, List
+
+
+ModelName = str
+NodeName = str
 
 
 @dataclass
@@ -17,7 +22,10 @@ class LookerType:
             **asdict(
                 self,
                 dict_factory=lambda x: {
-                    k: v for (k, v) in x if v is not None and k != "looker_args"
+                    # filter out protected keys
+                    k: v
+                    for (k, v) in x
+                    if v is not None and k not in {"looker_args", "relative_path"}
                 },
             ),
         }
@@ -25,34 +33,21 @@ class LookerType:
 
 @dataclass
 class JoinConfig(LookerType):
+    relative_path: Path
+
     def import_name(self) -> str:
         return self.looker_args["from"] if "from" in self.looker_args else self.name
 
 
 @dataclass
 class ExploreConfig:
-    name: str
+    name: ModelName
     joins: List[JoinConfig]
     looker_args: Dict[str, Any]
 
+    # TODO: change to get_*
     def import_name(self) -> str:
         return self.looker_args["from"] if "from" in self.looker_args else self.name
-
-    def as_dict(self) -> Dict:
-        # TODO: views dir should be parametized
-        import_string = "/views/{0}.view.lkml"
-        # use a set to get unqiue values
-        join_imports = list({import_string.format(j.import_name()) for j in self.joins})
-
-        parent_import = import_string.format(self.import_name())
-
-        args = {**self.looker_args, "name": self.name}
-        joins = [j.as_dict() for j in self.joins]
-
-        return {
-            "includes": [parent_import, *sorted(join_imports)],
-            "explore": {**args, "joins": joins},
-        }
 
 
 @dataclass
@@ -81,6 +76,7 @@ class View:
     dimension_groups: List[DimensionGroup]
     measures: List[Measure]
     looker_args: Dict[str, Any]
+    file_path: Path
 
     def as_dict(self) -> Dict:
         return {
