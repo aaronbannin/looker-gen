@@ -16,7 +16,12 @@ def get_schema_targets(schemas: str) -> Optional[Set[str]]:
     return {s.lower().strip() for s in schemas.split(",")}
 
 
-@click.command()
+@click.group()
+def cli():
+    pass
+
+
+@cli.command()
 @click.option(
     "-d",
     "--dbt-dir",
@@ -93,7 +98,7 @@ def gen(dbt_dir: str, models: str, output_dir: str, schemas: str) -> None:
             lkml.dump(models, modelfile)
 
 
-@click.command()
+@cli.command()
 @click.option(
     "-c",
     "--test-content",
