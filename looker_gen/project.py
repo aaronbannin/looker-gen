@@ -3,8 +3,7 @@ from typing import Dict
 
 from looker_gen import config, ViewDirectoryStructure
 from looker_gen.files import FileManager
-from looker_gen.logging import log
-from looker_gen.types import ModelName, NodeName, View
+from looker_gen.types import ModelName, NodeName
 
 
 class DBTProject:
@@ -54,10 +53,15 @@ class DBTProject:
         return self.manifest["nodes"][node_name]["columns"]
 
     def _build_view_relative_path(self, node_name: NodeName) -> Path:
+        """
+        Build relative path based ViewDirectoryStructure config
+
+        Will be appended to view output dir later
+        """
         manifest = self.manifest["nodes"][node_name]
 
         if config.view_dir_structure == ViewDirectoryStructure.flat:
-            return self.dbt_path.joinpath("views")
+            return Path()
 
         elif config.view_dir_structure == ViewDirectoryStructure.dbt:
             relative_path = Path(manifest["path"])

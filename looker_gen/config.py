@@ -1,6 +1,7 @@
-import configparser
+from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
+from os import getenv
 
 from looker_gen.logging import log
 
@@ -30,6 +31,10 @@ class ViewDirectoryStructure(Enum):
     dbt = "dbt"
     database = "database"
 
+    @classmethod
+    def _missing_(cls, value: object) -> ViewDirectoryStructure:
+        return cls.flat
+
 
 @dataclass(frozen=True)
 class Config:
@@ -45,14 +50,7 @@ class Config:
 
 
 def import_config() -> Config:
-    parser = configparser.ConfigParser()
-    parser.read(CONFIG_FILE_NAME)
-    log.debug(f"Looking for configs in file {CONFIG_FILE_NAME}")
-
-    try:
-        dir_config = parser["views"]["dir_structure"]
-        view_dir_structure = ViewDirectoryStructure(dir_config)
-    except:
-        view_dir_structure = ViewDirectoryStructure.flat
+    dir_config = getenv("LOOKERGEN_DIR_CONFIG", ViewDirectoryStructure.flat.value)
+    view_dir_structure = ViewDirectoryStructure(dir_config)
 
     return Config(view_dir_structure=view_dir_structure)

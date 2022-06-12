@@ -348,7 +348,7 @@ class LookMLGenerator:
         self, config: ExploreConfig, files: FileManager
     ) -> Dict[str, Any]:
         join_imports = list(
-            str(files.fully_qualified_view_path(j.relative_path) for j in config.joins)
+            str(files.fully_qualified_view_path(j.relative_path)) for j in config.joins
         )
         parent_import = str(
             files.fully_qualified_view_path(self.project.build_view_path(config.name))
