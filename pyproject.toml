@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "looker-gen"
-version = "0.1.0"
+version = "0.1.2"
 description = ""
 license = "BSD-4-Clause"
 authors = ["Aaron Bannin <aaronbannin@hotmail.com>"]
