@@ -3,7 +3,7 @@ Looker Gen
 
 Generate LookML from a dbt project. Reads from your dbt repo and outputs files; can output to your Looker repo.
 
-Currently in experimentation mode, very opinionated about output directory structure.
+Currently in experimentation mode, the API may break. Somewhat opinionated about output directory structure, refer to `config.py` for options.
 
 ## Installation
 - Clone repo
@@ -30,7 +30,7 @@ Note: `dbt run` can replace `compile`. To ensure that LookML columns matches dat
 `$LOOKER_DIR` = Directory of LookML repo
 
 ```
-poetry run gen -d $DBT_DIR -o $LOOKER_DIR
+poetry run looker-gen gen -d $DBT_DIR -o $LOOKER_DIR
 ```
 
 This will output generated files with to output destination with the following structure:
@@ -58,10 +58,10 @@ The `poetry run validate` command can validate your LookML repo with Looker's li
 `$PROJECT` = Name of project within Looker.
 
 ```
-poetry run validate -p $PROJECT -l $LOOKER_DIR
+poetry run looker-gen validate -p $PROJECT -l $LOOKER_DIR
 ```
 
-Note: use `poetry run validate --help` for options
+Note: use `poetry run looker-gen validate --help` for options
 
 ## DBT Configuration Overview
 Use the `looker-gen` key witn an element's `meta` tag. (Example below)
