@@ -15,9 +15,11 @@ def get_schema_targets(schemas: str) -> Optional[Set[str]]:
 
     return {s.lower().strip() for s in schemas.split(",")}
 
+
 @click.group()
 def cli():
     pass
+
 
 @cli.command()
 @click.option(
