@@ -1,6 +1,9 @@
+[metadata]
+url = "https://github.com/aaronbannin/looker-gen"
+
 [tool.poetry]
 name = "looker-gen"
-version = "0.1.2"
+version = "0.1.3"
 description = ""
 license = "BSD-4-Clause"
 authors = ["Aaron Bannin <aaronbannin@hotmail.com>"]

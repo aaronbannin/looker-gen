@@ -5,6 +5,8 @@ Generate LookML from a dbt project. Reads from your dbt repo and outputs files; 
 
 Currently in experimentation mode, the API may break. Somewhat opinionated about output directory structure, refer to `config.py` for options.
 
+Requires `dbt 1.0.0` or later.
+
 ## Installation
 Installable [from PyPi](https://pypi.org/project/looker-gen/)
 
