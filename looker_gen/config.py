@@ -48,7 +48,7 @@ class Config:
 def import_config() -> Config:
     dir_config = getenv("LOOKERGEN_DIR_CONFIG", ViewDirectoryStructure.flat.value)
     view_dir_structure = ViewDirectoryStructure(dir_config)
-    
+
     type_mapping = None
     mapping_path = getenv("LOOKERGEN_TYPE_MAPPING", None)
     if mapping_path:

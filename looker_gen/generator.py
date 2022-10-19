@@ -37,13 +37,13 @@ class LookMLGenerator:
     def __init__(self, dbt_dir: str) -> None:
         self.project = DBTProject(dbt_dir)
         self.explores = self.build_explores()
-        
+
         self.type_mappings = self._get_type_mappings(config)
-        
+
     def _get_type_mappings(self, config: Config) -> Dict:
         if config.type_mapping is None:
             return SNOWFLAKE_TYPE_CONVERSIONS
-        
+
         return FileManager.load_json(config.type_mapping)
 
     def get_model_targets(self, models: str) -> Set[str]:
@@ -78,8 +78,7 @@ class LookMLGenerator:
         config = self.get_column_config(node_name, column_name)
         ignored = "ignore-dim" in config
         if (
-            self.type_mappings[catalog["type"]]["value"]
-            in LOOKER_DIM_GROUP_TYPES
+            self.type_mappings[catalog["type"]]["value"] in LOOKER_DIM_GROUP_TYPES
         ) or ignored:
             return False
 
@@ -91,8 +90,7 @@ class LookMLGenerator:
         config = self.get_column_config(node_name, column_name)
         ignored = "ignore-dim" in config
         if (
-            self.type_mappings[catalog["type"]]["value"]
-            in LOOKER_DIM_GROUP_TYPES
+            self.type_mappings[catalog["type"]]["value"] in LOOKER_DIM_GROUP_TYPES
         ) and not ignored:
             return True
 

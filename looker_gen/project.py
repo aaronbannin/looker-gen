@@ -16,8 +16,12 @@ class DBTProject:
         self.project_name = project["name"]
         self.model_prefix = f"model.{self.project_name}"
 
-        self.catalog = FileManager.load_json_with_prefix(dbt_target_location, "catalog.json")
-        self.manifest = FileManager.load_json_with_prefix(dbt_target_location, "manifest.json")
+        self.catalog = FileManager.load_json_with_prefix(
+            dbt_target_location, "catalog.json"
+        )
+        self.manifest = FileManager.load_json_with_prefix(
+            dbt_target_location, "manifest.json"
+        )
 
         # make column names lower case for lookups; we are not case sensitive
         for node_name in self.catalog["nodes"].keys():

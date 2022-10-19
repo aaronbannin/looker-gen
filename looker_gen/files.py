@@ -23,7 +23,7 @@ class FileManager:
     def load_json(path: Path) -> Dict:
         with open(path, "r") as f:
             return json.load(f)
-        
+
     @staticmethod
     def load_json_with_prefix(prefix: str, name: str) -> Dict:
         path = Path(prefix).joinpath(name)
