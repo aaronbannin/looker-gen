@@ -1,0 +1,30 @@
+{
+    "bigint":{
+        "value":"number"
+     },
+    "integer":{
+       "value":"number"
+    },
+    "double":{
+       "value":"number"
+    },
+    "varchar":{
+       "value":"string"
+    },
+    "blob":{
+       "value":"string"
+    },
+    "boolean":{
+       "value":"yesno"
+    },
+    "date":{
+       "value":"time"
+    },
+    "text":{
+        "value":"string"
+     },   
+    "timestamp":{
+       "value":"time"
+    }
+ }
+ 

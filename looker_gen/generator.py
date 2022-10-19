@@ -1,6 +1,9 @@
+from pathlib import Path
 from typing import Any, Dict, List, Set
-from looker_gen.files import FileManager
 
+from looker_gen import config
+from looker_gen.config import Config
+from looker_gen.files import FileManager
 from looker_gen.project import DBTProject
 from looker_gen.types import (
     Dimension,
@@ -12,47 +15,8 @@ from looker_gen.types import (
     NodeName,
     View,
 )
+from looker_gen.type_mappings import SNOWFLAKE_TYPE_CONVERSIONS
 
-SNOWFLAKE_TYPE_CONVERSIONS = {
-    "NUMBER": {"value": "number"},
-    "DECIMAL": {"value": "number"},
-    "NUMERIC": {"value": "number"},
-    "INT": {"value": "number"},
-    "INTEGER": {"value": "number"},
-    "BIGINT": {"value": "number"},
-    "SMALLINT": {"value": "number"},
-    "FLOAT": {"value": "number"},
-    "FLOAT4": {"value": "number"},
-    "FLOAT8": {"value": "number"},
-    "DOUBLE": {"value": "number"},
-    "DOUBLE PRECISION": {"value": "number"},
-    "REAL": {"value": "number"},
-    "VARCHAR": {"value": "string"},
-    "CHAR": {"value": "string"},
-    "CHARACTER": {"value": "string"},
-    "STRING": {"value": "string"},
-    "TEXT": {"value": "string"},
-    "BINARY": {"value": "string"},
-    "VARBINARY": {"value": "string"},
-    "BOOLEAN": {"value": "yesno"},
-    "DATE": {"value": "time"},
-    "DATETIME": {"value": "time"},
-    "TIME": {"value": "string"},
-    "TIMESTAMP": {"value": "time"},
-    "TIMESTAMP_NTZ": {"value": "time"},
-    "TIMESTAMP_TZ": {
-        "value": "time",
-        "sql": "CAST(CONVERT_TIMEZONE('UTC', ${{TABLE}}.\"{name}\") AS TIMESTAMP_NTZ)",
-    },
-    "TIMESTAMP_LTZ": {
-        "value": "time",
-        "sql": "CAST(CONVERT_TIMEZONE('UTC', ${{TABLE}}.\"{name}\") AS TIMESTAMP_NTZ)",
-    },
-    "VARIANT": {"value": "string"},
-    "OBJECT": {"value": "string"},
-    "ARRAY": {"value": "string"},
-    "GEOGRAPHY": {"value": "string"},
-}
 
 LOOKER_DIM_GROUP_TYPES = ["time", "duration"]
 
@@ -73,6 +37,14 @@ class LookMLGenerator:
     def __init__(self, dbt_dir: str) -> None:
         self.project = DBTProject(dbt_dir)
         self.explores = self.build_explores()
+        
+        self.type_mappings = self._get_type_mappings(config)
+        
+    def _get_type_mappings(self, config: Config) -> Dict:
+        if config.type_mapping is None:
+            return SNOWFLAKE_TYPE_CONVERSIONS
+        
+        return FileManager.load_json(config.type_mapping)
 
     def get_model_targets(self, models: str) -> Set[str]:
         if models is None:
@@ -106,7 +78,7 @@ class LookMLGenerator:
         config = self.get_column_config(node_name, column_name)
         ignored = "ignore-dim" in config
         if (
-            SNOWFLAKE_TYPE_CONVERSIONS[catalog["type"]]["value"]
+            self.type_mappings[catalog["type"]]["value"]
             in LOOKER_DIM_GROUP_TYPES
         ) or ignored:
             return False
@@ -119,7 +91,7 @@ class LookMLGenerator:
         config = self.get_column_config(node_name, column_name)
         ignored = "ignore-dim" in config
         if (
-            SNOWFLAKE_TYPE_CONVERSIONS[catalog["type"]]["value"]
+            self.type_mappings[catalog["type"]]["value"]
             in LOOKER_DIM_GROUP_TYPES
         ) and not ignored:
             return True
@@ -152,7 +124,7 @@ class LookMLGenerator:
 
         # should dim groups have type and datatype?
         # https://docs.looker.com/reference/field-params/datatype?version=22.6&lookml=new
-        conversion = SNOWFLAKE_TYPE_CONVERSIONS[catalog[column_name]["type"]]
+        conversion = self.type_mappings[catalog[column_name]["type"]]
         args["sql"] = (
             conversion["sql"].format(name=catalog[column_name]["name"])
             if "sql" in conversion
