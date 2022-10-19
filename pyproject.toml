@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "looker-gen"
-version = "0.1.4"
+version = "0.1.5"
 description = "Generate LookML for a dbt project"
 license = "BSD-4-Clause"
 authors = ["Aaron Bannin <aaronbannin@hotmail.com>"]
