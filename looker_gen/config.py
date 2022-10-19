@@ -2,11 +2,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
 from os import getenv
-
-from looker_gen.logging import log
-
-
-CONFIG_FILE_NAME = "looker-gen.ini"
+from pathlib import Path
 
 
 class ViewDirectoryStructure(Enum):
@@ -43,9 +39,9 @@ class Config:
     """
 
     view_dir_structure: ViewDirectoryStructure
+    type_mapping: Path
 
     # TODO
-    # type_mappings: customize type mapping from db to looker
     # view_dir: set name of view directory
 
 
@@ -53,4 +49,9 @@ def import_config() -> Config:
     dir_config = getenv("LOOKERGEN_DIR_CONFIG", ViewDirectoryStructure.flat.value)
     view_dir_structure = ViewDirectoryStructure(dir_config)
 
-    return Config(view_dir_structure=view_dir_structure)
+    type_mapping = None
+    mapping_path = getenv("LOOKERGEN_TYPE_MAPPING", None)
+    if mapping_path:
+        type_mapping = Path(mapping_path)
+
+    return Config(view_dir_structure, type_mapping)
